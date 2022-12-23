@@ -19,9 +19,9 @@ import jax.numpy as jnp
 import numpy as np
 import tensorflow as tf
 
-
-def look_at(eye, center, world_up):
-  """Computes camera viewing matrices.
+"""
+# def look_at(eye, center, world_up):
+  Computes camera viewing matrices.
 
   Functionality mimes gluLookAt (third_party/GL/glu/include/GLU/glu.h).
 
@@ -38,35 +38,26 @@ def look_at(eye, center, world_up):
     A [batch_size, 4, 4] float tensor containing a right-handed camera
     extrinsics matrix that maps points from world space to points in eye space.
   """
-  eye = tf.convert_to_tensor(eye)
-  center = tf.convert_to_tensor(center)
-  world_up = tf.convert_to_tensor(world_up)
-  batch_size = tf.dimension_value(center.shape[0])
+
+"""
+  eye = jnp.array(eye)
+  center = jnp.array(center)
+  world_up = jnp.array(world_up)
+  batch_size = center.shape[0]
 
   vector_degeneracy_cutoff = 1e-6
   forward = center - eye
-  forward_norm = tf.norm(forward, ord='euclidean', axis=1, keepdims=True)
-  with tf.control_dependencies([
-      tf.assert_greater(
-          forward_norm,
-          vector_degeneracy_cutoff,
-          message='Camera matrix is degenerate because eye and center are close.'
-      )
-  ]):
-    forward = tf.divide(forward, forward_norm)
+  forward_norm = jnp.linalg.norm(forward, ord='euclidean', axis=1, keepdims=True)
+  assert forward_norm > vector_degeneracy_cutoff , 'Camera matrix is degenerate because eye and center are close.'
+  forward = jnp.divide(forward, forward_norm)
 
-  to_side = tf.linalg.cross(forward, world_up)
-  to_side_norm = tf.norm(to_side, ord='euclidean', axis=1, keepdims=True)
-  with tf.control_dependencies([
-      tf.assert_greater(
-          to_side_norm,
-          vector_degeneracy_cutoff,
-          message='{0} {1}'.format(
-              'Camera matrix is degenerate because up and gaze are close or',
-              'because up is degenerate.'))
-  ]):
-    to_side = tf.divide(to_side, to_side_norm)
-    cam_up = tf.linalg.cross(to_side, forward)
+  to_side = jnp.linalg.cross(forward, world_up)
+  to_side_norm = jnp.linalg.norm(to_side, ord='euclidean', axis=1, keepdims=True)
+  # TODO : change assertions to jax assertions. checkify?
+  assert to_side_norm > vector_degeneracy_cutoff, 'Camera matrix is degenerate because up and gaze are close or up is degenerate'
+
+  to_side = jnp.divide(to_side, to_side_norm)
+  cam_up = jnp.linalg.cross(to_side, forward)
 
   w_column = tf.constant(
       batch_size * [[0., 0., 0., 1.]], dtype=tf.float32)  # [batch_size, 4]
@@ -86,7 +77,7 @@ def look_at(eye, center, world_up):
   camera_matrices = tf.matmul(view_rotation, view_translation)
   return camera_matrices
 
-
+"""
 def look_at_np(eye, center, world_up):
   """Computes camera viewing matrices.
 

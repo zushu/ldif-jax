@@ -9,7 +9,7 @@ from camera_util import *
 ldif_root = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
 sys.path.append(ldif_root)
 print(ldif_root)
-import ldif_tf.util.camera_util as camera_util_tf
+import ldif.ldif.util.camera_util as camera_util_tf
 import unittest
 
 class TestCameraUtil(unittest.TestCase):

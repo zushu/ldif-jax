@@ -112,9 +112,9 @@ def remove_element(t, elt, axis):
     Tensor with shape similar to t, except that the axis-th dimension of the
     output has one element removed.
   """
-  elt = int(elt) #tf.cast(elt, dtype=tf.int32)
+  elt = elt.astype(dtype=jnp.int32)
   t_shape = jnp.shape(t).as_list()
-  elt_tensor = int(list(range(t.shape[axis].value)))
+  elt_tensor = (list(range(t.shape[axis].value))).astype(dtype=jnp.int32)
   num_dims_before_axis = axis
   num_dims_after_axis = len(t.shape) - axis - 1
   elt_tensor = jnp.logical_not(jnp.equal(elt_tensor, jnp.reshape(elt, [1])))
